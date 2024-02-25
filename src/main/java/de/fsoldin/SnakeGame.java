@@ -15,23 +15,25 @@ public class SnakeGame extends JPanel implements ActionListener {
         frame.add(snakeGame);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.setPreferredSize(new Dimension(300, 300));
         frame.pack();
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
     }
 
+    private Snake snake;
+    private Apple apple;
     private final Timer timer;
     private final KeyAdapter keyAdapter;
-
-    private Snake snake;
 
     public SnakeGame() {
         this.keyAdapter = new KeyAdapter();
         this.addKeyListener(keyAdapter);
-        this.snake = new Snake(new Vector2f(150, 150), Direction.DOWN);
+        this.setFocusable(true);
+        this.snake = new Snake(new Vector2f(150, 150), Direction.DOWN,10,10);
+        this.apple = Apple.createRandomApple();
         this.timer = new Timer(75, this);
         this.timer.start();
+
     }
 
     @Override
@@ -42,13 +44,46 @@ public class SnakeGame extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if(keyAdapter.isLeft()){
+            snake.setDirection(Direction.LEFT);
+        }
+        if(keyAdapter.isRight()){
+            snake.setDirection(Direction.RIGHT);
+        }
+        if(keyAdapter.isUp()){
+            snake.setDirection(Direction.UP);
+        }
+        if(keyAdapter.isDown()){
+            snake.setDirection(Direction.DOWN);
+        }
         snake.move();
+        snake.intersects(apple);
         repaint();
     }
 
     public void render(Graphics g) {
+        g.setColor(Color.GREEN);
+        g.fillRect((int) apple.getPosition().getX(), (int) apple.getPosition().getY(),apple.getWidth(),apple.getHeight());
         g.setColor(Color.BLACK);
-        g.fillRect((int) snake.getPosition().getX(), (int) snake.getPosition().getY(), 10, 10);
+        //foreach
+        for(Vector2f position: snake.getPositions()){
+            g.fillRect((int) position.getX(), (int) position.getY(), snake.getWidth(), snake.getHeight());
+        }
+
     }
 
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(300, 300);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return getPreferredSize();
+    }
 }

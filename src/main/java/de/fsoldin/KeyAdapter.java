@@ -10,7 +10,6 @@ public class KeyAdapter implements KeyListener {
     private boolean up = false;
     private boolean down = false;
 
-
     @Override
     public void keyTyped(KeyEvent e) {
 
@@ -34,5 +33,20 @@ public class KeyAdapter implements KeyListener {
             case KeyEvent.VK_UP -> up = false;
             case KeyEvent.VK_DOWN -> down = false;
         }
+    }
+
+    public boolean isLeft(){
+        return this.left;
+    }
+    public boolean isRight(){
+        return this.right;
+    }
+
+    public boolean isUp(){
+        return this.up;
+    }
+
+    public boolean isDown(){
+        return this.down;
     }
 }
