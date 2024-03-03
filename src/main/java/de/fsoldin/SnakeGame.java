@@ -20,9 +20,8 @@ public class SnakeGame extends JPanel implements ActionListener {
         frame.setLocationRelativeTo(null);
     }
 
-    private Snake snake;
-    private Apple apple;
-    private final Timer timer;
+    private final Snake snake;
+    private final Apple apple;
     private final KeyAdapter keyAdapter;
 
     public SnakeGame() {
@@ -31,8 +30,8 @@ public class SnakeGame extends JPanel implements ActionListener {
         this.setFocusable(true);
         this.snake = new Snake(new Vector2f(150, 150), Direction.DOWN,10,10);
         this.apple = Apple.createRandomApple();
-        this.timer = new Timer(75, this);
-        this.timer.start();
+        Timer timer = new Timer(75, this);
+        timer.start();
 
     }
 
@@ -46,19 +45,22 @@ public class SnakeGame extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(keyAdapter.isLeft()){
             snake.setDirection(Direction.LEFT);
-        }
-        if(keyAdapter.isRight()){
+        }else if(keyAdapter.isRight()){
             snake.setDirection(Direction.RIGHT);
-        }
-        if(keyAdapter.isUp()){
+        } else if(keyAdapter.isUp()){
             snake.setDirection(Direction.UP);
-        }
-        if(keyAdapter.isDown()){
+        }else if(keyAdapter.isDown()){
             snake.setDirection(Direction.DOWN);
+        }else {
+            snake.setDirection();
         }
         snake.move();
         snake.intersects(apple);
         repaint();
+        if(snake.isGameOver()) {
+            System.err.println("GAME OVER!");
+            System.exit(0);
+        }
     }
 
     public void render(Graphics g) {

@@ -1,87 +1,77 @@
 package de.fsoldin;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Snake {
-    private List<Vector2f> positions;
-    private Direction direction;
+    private final List<SnakeBody> snakeBodies;
     private final int height;
     private final int width;
-    public Snake(Vector2f position, Direction direction,int width, int height) {
-        this.positions = List.of(position);
-        this.direction = direction;
+
+    public Snake(Vector2f position, Direction direction, int width, int height) {
+        this.snakeBodies = new ArrayList<>();
+        this.snakeBodies.add(new SnakeBody(position, direction, width, height));
         this.height = height;
-        this.width= width;
+        this.width = width;
     }
 
-    public void setDirection(Direction newDirection){
-        if(direction==Direction.RIGHT && newDirection!= Direction.LEFT ||
-            direction== Direction.LEFT && newDirection != Direction.RIGHT ||
-            direction== Direction.UP && newDirection != Direction.DOWN ||
-            direction== Direction.DOWN && newDirection != Direction.UP){
-            this.direction = newDirection;
+    public void setDirection(Direction newDirection) {
+        for (int i = snakeBodies.size() - 1; i > 0; i--) {
+            SnakeBody previous = snakeBodies.get(i - 1);
+            SnakeBody current = snakeBodies.get(i);
+            current.setDirection(previous.getDirection());
+        }
+        this.snakeBodies.getFirst().setDirection(newDirection);
+    }
+
+    public void setDirection() {
+        for (int i = snakeBodies.size() - 1; i > 0; i--) {
+            SnakeBody previous = snakeBodies.get(i - 1);
+            SnakeBody current = snakeBodies.get(i);
+            current.setDirection(previous.getDirection());
         }
     }
 
     public void move() {
-        switch (direction) {
-            case LEFT:
-                positions.getFirst().substract(new Vector2f(1, 0));
-                break;
-            case RIGHT:
-                positions.getFirst().add(new Vector2f(1, 0));
-                break;
-            case UP:
-                positions.getFirst().substract(new Vector2f(0, 1));
-                break;
-            case DOWN:
-                positions.getFirst().add(new Vector2f(0, 1));
-                break;
-        }
-        if(positions.getFirst().getX() > 299){
-            positions.getFirst().setX(0);
-        }
-        if(positions.getFirst().getX()<0){
-            positions.getFirst().setX(299);
-        }
-        if(positions.getFirst().getY()>299){
-            positions.getFirst().setY(0);
-        }
-        if(positions.getFirst().getY()<0){
-            positions.getFirst().setY(299);
-        }
+        this.snakeBodies.forEach(SnakeBody::move);
     }
 
-    public Vector2f getHeadPosition(){
-        return this.positions.getFirst();
+    public Vector2f getHeadPosition() {
+        return this.snakeBodies.getFirst().getPosition();
     }
 
-    public List<Vector2f> getPositions(){
-        return this.positions;
+    public List<Vector2f> getPositions() {
+        return this.snakeBodies.stream().map(SnakeBody::getPosition).collect(Collectors.toList());
     }
 
-    public int getWidth(){
+    public int getWidth() {
         return this.width;
     }
 
-    public int getHeight(){
+    public int getHeight() {
         return this.height;
     }
 
     public void intersects(Apple apple) {
-        //return other.getLeft() < this->getRight() &&
-        //			this->getLeft() < other.getRight() &&
-        //			other.getTop() < this->getBottom() &&
-        //			this->getTop() < other.getBottom();
-        //getRight ist die rechte Ecke vom Viereck, x rechts vom Viereck
-        //getLeft ist die linke Ecke vom Viereck x links vom Viereck
-        if(apple.getPosition().getX() < this.getHeadPosition().getX() + width &&
-            this.getHeadPosition().getX() < apple.getPosition().getX() + apple.getWidth() &&
+        if (apple.getPosition().getX() < this.getHeadPosition().getX() + width &&
+                this.getHeadPosition().getX() < apple.getPosition().getX() + apple.getWidth() &&
                 apple.getPosition().getY() < this.getHeadPosition().getY() + height &&
-                this.getHeadPosition().getY() < apple.getPosition().getY() + apple.getHeight()){
+                this.getHeadPosition().getY() < apple.getPosition().getY() + apple.getHeight()) {
             apple.nextPosition();
-            Vector2f lastPosition = this.positions.getLast();
-            //this.positions.add(new Vector2f());
+            snakeBodies.add(snakeBodies.getLast().createNextTail());
         }
+    }
+
+    public boolean isGameOver() {
+        //Wenn Head mit irgendeinen Snake Body außer sich selbst überschneided, dann true, ansonsten false
+        SnakeBody head = snakeBodies.getFirst();
+        for (int i = 2; i < snakeBodies.size(); i++) {
+            SnakeBody tail = snakeBodies.get(i);
+            if(head.intersects(tail)){
+                return true;
+            }
+        }
+        return false;
     }
 }
